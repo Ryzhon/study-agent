@@ -1,0 +1,32 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習計画作成</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">学習計画作成</h1>
+        <form id="studyForm" action="/generate" method="POST">
+            <div class="form-group">
+                <label>生成する内容を選択してください:</label><br>
+                <input type="radio" name="generate_options" value="問題生成" id="option1">
+                <label for="option1">問題生成</label><br>
+                <input type="radio" name="generate_options" value="モチベーター" id="option2">
+                <label for="option2">モチベーター</label><br>
+                <input type="radio" name="generate_options" value="勉強プラン提案" id="option3">
+                <label for="option3">勉強プラン提案</label><br>
+            </div>
+            <div class="form-group">
+                <label for="userInput">入力内容:</label>
+                <textarea class="form-control" id="userInput" name="user_input" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">生成</button>
+        </form>
+        <div id="result" class="mt-5"></div>
+    </div>
+</body>
+</html>
