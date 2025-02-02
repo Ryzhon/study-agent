@@ -1,32 +1,52 @@
-<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学習計画作成</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>チャットアプリ</title>
 </head>
 <body>
-    <div class="container">
-        <h1 class="mt-5">学習計画作成</h1>
-        <form id="studyForm" action="/generate" method="POST">
-            <div class="form-group">
-                <label>生成する内容を選択してください:</label><br>
-                <input type="radio" name="generate_options" value="問題生成" id="option1">
-                <label for="option1">問題生成</label><br>
-                <input type="radio" name="generate_options" value="モチベーター" id="option2">
-                <label for="option2">モチベーター</label><br>
-                <input type="radio" name="generate_options" value="勉強プラン提案" id="option3">
-                <label for="option3">勉強プラン提案</label><br>
-            </div>
-            <div class="form-group">
-                <label for="userInput">入力内容:</label>
-                <textarea class="form-control" id="userInput" name="user_input" rows="3"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">生成</button>
-        </form>
-        <div id="result" class="mt-5"></div>
+    <div class="chat-container">
+        <div class="tab-container">
+            <div class="tab" onclick="selectTab('question-answer')">質問・解説</div>
+            <div class="tab" onclick="selectTab('learning-plan')">学習プラン作成</div>
+            <div class="tab" onclick="selectTab('motivation')">モチベーター</div>
+        </div>
+        <div class="chat-box" id="chat-box"></div>
+        <textarea id="user-input" placeholder="メッセージを入力..."></textarea>
+        <button id="send-button">送信</button>
     </div>
+
+    <script>
+        let currentTab = 'question-answer';
+
+        function selectTab(tab) {
+            currentTab = tab;
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        document.getElementById("send-button").onclick = function() {
+            const userInput = document.getElementById("user-input").value;
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<div class="user-message">${userInput}</div>`;
+            document.getElementById("user-input").value = '';
+
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `message=${encodeURIComponent(userInput)}&tab=${currentTab}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatBox.innerHTML += `<div class="ai-message">${data.response}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight; // スクロールを下に
+            });
+        };
+    </script>
 </body>
 </html>
