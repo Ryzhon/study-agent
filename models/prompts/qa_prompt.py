@@ -29,13 +29,20 @@ def get_answer_explanation_prompt(problem_text: str, user_answer: str) -> ChatPr
     return ChatPromptTemplate.from_template(
         f"""あなたは「解説エキスパート（大学受験）」です。
 
-        以下の問題文とユーザーの回答に基づき、模範解答と解説を作成してください。
+        以下の情報を踏まえて、必ず **「解答」** を先に示したあとで **「解説」** を記述してください。
 
-        問題文:
+        [問題文]
         {safe_problem_text}
 
-        ユーザーの回答:
+        [ユーザー回答]
         {safe_user_answer}
+
+        [注意]
+        - 「解答」パートには最終的な正解(あるいは誤答であれば誤りを明記)を簡潔に書く
+        - 「解説」パートでは問題の背景・他の選択肢との比較・理由付けを行う
+        - 「解答」と「解説」を混在させず、必ず以下の形式で書く
+        解答:
+        解説:
 
         [出力例]
         解答:
@@ -47,19 +54,23 @@ def get_explanation_quality_check_prompt(explanation_text: str) -> ChatPromptTem
     safe_explanation_text = explanation_text.replace("{", "{{").replace("}", "}}")
 
     return ChatPromptTemplate.from_template(
-        f"""あなたは「解説品質検証エキスパート（大学受験）」です。
+        f"""
+        あなたは「解説品質検証エキスパート（大学受験）」です。
 
-        以下の解説をチェックし、誤りや不足があれば修正案を提示してください。
-        解説:
+        以下の解答・解説をチェックし、誤りや不足があれば「修正案:」の後に修正版を出力してください。
+        ただし、必ず「解答:」「解説:」という2つのパートを保ち、書式を崩さないでください。
+
+        [解答・解説]
         {safe_explanation_text}
 
         [指示]
-        - OKの場合、"OK"とコメント
-        - 修正案がある場合、「修正案:」の後に修正バージョンを提示
-        - コメントも付け加えてください
-        """.strip()
-    )
-
+        - OK だと思う場合は "OK" を返す（必要なら簡単なコメントもOK）
+        - 修正が必要な場合は、「修正案:」の後に修正バージョンを提示し、
+        その際「解答:」「解説:」パートを必ず残すこと
+        - 余計な指示や全角カギ括弧「」などは含めず、ユーザーが見る最終的な文章を返す
+        - 改行や書式を崩さず、分かりやすく修正してください
+                """.strip()
+            )
 
 def get_problem_maker_prompt(user_query: str) -> ChatPromptTemplate:
     return ChatPromptTemplate.from_template(
