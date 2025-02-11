@@ -15,14 +15,10 @@ from models.prompts.qa_prompt import (
     get_decision_prompt
     )
 
-
-
-
 load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY", "")
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.0, openai_api_key=openai_api_key)
-
 
 def decide_flow_node(state: QAState) -> dict:
     prompt = get_decision_prompt()
@@ -74,14 +70,11 @@ def answer_flow_node(state: QAState) -> QAState:
         state.final_message = "前回の問題が見つかりません。先に問題を出題してください。"
         return state
 
-    # 解説生成
     answer_explanation_prompt = get_answer_explanation_prompt(prev_problem, state.user_answer)
     answer_explanation_chain = answer_explanation_prompt | llm | StrOutputParser()
     explanation_raw = answer_explanation_chain.invoke({})
-
     explanation_raw = cleanup_text(explanation_raw)
 
-    # 解説の品質検証
     explanation_quality_check_prompt = get_explanation_quality_check_prompt(explanation_raw)
     explanation_quality_check_chain = explanation_quality_check_prompt | llm | StrOutputParser()
     check_result = explanation_quality_check_chain.invoke({})

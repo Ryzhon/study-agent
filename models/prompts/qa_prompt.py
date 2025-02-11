@@ -22,9 +22,7 @@ def get_decision_prompt()-> ChatPromptTemplate:
 
 
 def get_answer_explanation_prompt(problem_text: str, user_answer: str) -> ChatPromptTemplate:
-    """
-    ユーザーの回答を踏まえて、模範解答と解説を生成するプロンプト。
-    """
+
     safe_problem_text = problem_text.replace("{", "{{").replace("}", "}}")
     safe_user_answer = user_answer.replace("{", "{{").replace("}", "}}")
 
@@ -74,6 +72,7 @@ def get_problem_maker_prompt(user_query: str) -> ChatPromptTemplate:
         問題文のみ生成し、解説や解答は不要です。
         """.strip()
     )
+
 def get_problem_quality_check_prompt(problem_text: str) -> ChatPromptTemplate:
     safe_problem_text = problem_text.replace("{", "{{").replace("}", "}}")
 
