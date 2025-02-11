@@ -1,13 +1,8 @@
-from flask import Blueprint, render_template, request, jsonify
-from flask import request, jsonify
-from langchain.chains.llm import LLMChain
-from langchain.prompts import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from flask import Blueprint, request, jsonify, render_template
+from markdown import markdown
+
+from models.workflows.qa_workflow import build_qa_workflow
+from models.states.qa_state import QAState
 
 views_blueprint = Blueprint('views', __name__)
 
@@ -17,27 +12,18 @@ def chat():
 
 @views_blueprint.route('/send_message', methods=['POST'])
 def send_message():
-    user_message = request.form['message']
+    user_message = request.form.get('message', '')
 
-    system_template = SystemMessagePromptTemplate.from_template(
-        "You are a helpful assistant."
-    )
-    user_template = HumanMessagePromptTemplate.from_template("{query}")
+    qa_workflow = build_qa_workflow()
+    compiled = qa_workflow.compile()
 
-    chat_prompt = ChatPromptTemplate.from_messages([system_template, user_template])
+    current_state = QAState(query=user_message)
 
-    chat_model = ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=0
-    )
+    result_dict = compiled.invoke(current_state)
+    final_state = QAState(**result_dict)
 
-    chain = LLMChain(
-        llm=chat_model,
-        prompt=chat_prompt
-    )
-
-    result = chain({"query": user_message})
-
-    final_response = result["text"]
-    return jsonify({'response': final_response})
-
+    return jsonify({
+        "output": markdown(final_state.final_message),
+        "problem_text": markdown(final_state.problem_text),
+        "explanation_text": markdown(final_state.explanation_text)
+    })
