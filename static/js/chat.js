@@ -38,6 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Error:", error);
       hideLoading();
+      const errorMessage = "エラーが発生しました。ページをリロードして、もう一度お試しください。";
+      appendMessage(chatBox, errorMessage, "error-message");
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
   }
 
@@ -56,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function showLoading() {
     loadingIndicator.style.display = "flex";
   }
+
   function hideLoading() {
     loadingIndicator.style.display = "none";
   }
